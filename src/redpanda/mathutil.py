@@ -20,13 +20,13 @@ def find_rotation_quat(*args):
       if abs(v[2]) < smallest:
         v = Vec3(0, 0, 1)
 
-      q = Quat(0, v1.cross(v)) * q
+      q = q * Quat(0, v1.cross(v))
     else:
       v = v1 + v2
       v.normalize()
       angle = v.dot(v2)
       axis = v.cross(v2)
-      q = Quat(angle, axis) * q
+      q = q * Quat(angle, axis)
 
     v1 = v2
 
