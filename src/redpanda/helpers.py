@@ -1,31 +1,38 @@
-from direct.showbase.DirectObject import DirectObject #@UnresolvedImport
+# -*- coding: UTF-8 -*-
+
 from redpanda.camera import SateliteCamera, FPSCamera, Camera
 from redpanda import getKeyboardMgr
 from redpanda.constants import Buttons
 
 
-def setupBasicCameraControls():
+def setupBasicCameraControls(camera=None):
 
-  if isinstance(base._camera, SateliteCamera):
+  if not camera:
+    if hasattr(base, '_camera'):
+      camera = base._camera
+    elif hasattr(base, 'camera'):
+      camera = base.camera
+
+  if isinstance(camera, SateliteCamera):
 
     def onControlLeftMouseDown(*args, **kwargs):
-      base._camera.resume()
+      camera.resume()
 
     def onLeftMouseUp(*args, **kwargs):
-      base._camera.pause()
+      camera.pause()
 
     def onMouseWheelUp(*args, **kwargs):
-      base._camera.zoom(delta=-1.5)
+      camera.zoom(delta=-1.5)
 
     def onMouseWheelDown(*args, **kwargs):
-      base._camera.zoom(delta=1.5)
+      camera.zoom(delta=1.5)
 
     base.accept('control-mouse1', onControlLeftMouseDown)
     base.accept('mouse1-up', onLeftMouseUp)
     base.accept('wheel_up', onMouseWheelUp)
     base.accept('wheel_down', onMouseWheelDown)
 
-  elif isinstance(base._camera, FPSCamera):
+  elif isinstance(camera, FPSCamera):
 
     def task(task):
       km, dir = getKeyboardMgr(), []
@@ -51,7 +58,7 @@ def setupBasicCameraControls():
         if Camera.DIRECTION_UP in dir:
           dir.remove(Camera.DIRECTION_UP)
 
-      base._camera.move(dir)
+      camera.move(dir)
 
       return task.cont
 
