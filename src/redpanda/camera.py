@@ -49,6 +49,7 @@ class Camera(DirectObject):
     self._dir = Vec3(0, 0, 0)
     self._middle = (int(u.winXmaxHalf), int(u.winYmaxHalf))
     self._lastPos = self._middle
+    self._revealMouseAt = None
     self._cameraMoved = False
     self._speedX = speedX
     self._speedY = speedY
@@ -79,13 +80,15 @@ class Camera(DirectObject):
     self._cameraTask = None
 
   def resume(self):
+    md = base.win.getPointer(0)
     if self._hideCursor:
       props = WindowProperties()
       props.setCursorHidden(True)
       base.win.requestProperties(props)
+      self._revealMouseAt = (md.getX(), md.getY())
       base.win.movePointer(0, self._middle[0], self._middle[1])
     else:
-      md = base.win.getPointer(0)
+      self._revealMouseAt = None
       self._lastPos = (md.getX(), md.getY())
     self._running = True
 
@@ -94,6 +97,8 @@ class Camera(DirectObject):
     props = WindowProperties()
     props.setCursorHidden(False)
     base.win.requestProperties(props)
+    if self._revealMouseAt:
+      base.win.movePointer(0, self._revealMouseAt[0], self._revealMouseAt[1])
 
   def destroy(self):
     taskMgr.remove(self._taskName)
