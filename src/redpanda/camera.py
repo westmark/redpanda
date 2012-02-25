@@ -31,7 +31,8 @@ class Camera(DirectObject):
                speedY=40,
                speedX=20,
                speedZ=20,
-               hideCursor=True
+               hideCursor=True,
+               **kwargs
                ):
     from redpanda import getScreenUtils
     u = getScreenUtils()
@@ -99,6 +100,7 @@ class Camera(DirectObject):
     base.win.requestProperties(props)
     if self._revealMouseAt:
       base.win.movePointer(0, self._revealMouseAt[0], self._revealMouseAt[1])
+      self._revealMouseAt = None
 
   def destroy(self):
     taskMgr.remove(self._taskName)
@@ -202,9 +204,9 @@ class SateliteCamera(Camera):
                    'hideCursor': True})
     Camera.__init__(self, *args, **kwargs)
     self._distance = kwargs.get('distance', 10.0)
-    self._zoomSpeed = kwargs.get('zoomSpeed', 1.0)
-    self._minDistance = kwargs.get('minDistance', 5.0)
-    self._maxDistance = kwargs.get('maxDistance', 100.0)
+    self._zoomSpeed = kwargs.get('zoom_speed', 1.0)
+    self._minDistance = kwargs.get('min_distance', 5.0)
+    self._maxDistance = kwargs.get('max_distance', 100.0)
 
   def start(self, *args, **kwargs):
     Camera.start(self, *args, **kwargs)
