@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 
-from direct.showbase.DirectObject import DirectObject #@UnresolvedImport
+from direct.showbase.DirectObject import DirectObject
 from redpanda.constants import Buttons
 from datetime import datetime
 
