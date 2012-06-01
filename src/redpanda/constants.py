@@ -33,6 +33,11 @@ class Buttons(object):
 
   LOOKUP = {}
 
+  MODIFIERS = [CTRL, LEFT_CTRL, RIGHT_CTRL,
+               SHIFT, LEFT_SHIFT, RIGHT_SHIFT,
+               ALT, LEFT_ALT, RIGHT_ALT,
+              ]
+
   @staticmethod
   def up(tag):
     return '%s-up' % tag
