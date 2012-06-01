@@ -25,3 +25,7 @@ MOUSE_WHEEL_UP = 'wheel_up'
 MOUSE_WHEEL_DOWN = 'wheel_down'
 
 MOUSE_MOVE = 'mousemove'
+
+KEY_DOWN = 'key-down'
+KEY_UP = 'key-up'
+KEY_PRESSED = 'key-pressed'

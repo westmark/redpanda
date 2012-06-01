@@ -42,7 +42,7 @@ class KeyboardMgr(DirectObject):
     if tag not in self._ignore:
       self._key_map.update({Buttons.LOOKUP.get(tag, tag): (status, datetime.now())})
       for callback in self._callbacks:
-        callback(tag=tag, status=status)
+        callback(tag=tag, status=status, repeat=False)
 
   def buttonRepeat(self, tag):
     if tag not in self._ignore:
@@ -52,7 +52,7 @@ class KeyboardMgr(DirectObject):
         if last.microseconds > self._repeatInterval:
           self._key_map.update({Buttons.LOOKUP.get(tag, tag): (status, datetime.now())})
           for callback in self._callbacks:
-            callback(tag=tag, status=True)
+            callback(tag=tag, status=True, repeat=True)
 
   def status(self, tag, status=None):
     if not status == None:
