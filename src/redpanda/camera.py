@@ -72,8 +72,8 @@ class Camera(DirectObject):
       self._heading, self._pitch, self._roll = base.camera.getHpr()
     else:
       base.camera.setHpr(self._heading, self._pitch, self._roll)
-    self._cameraTask = taskMgr.add(self.task, self._taskName, uponDeath=self.cleanup)
     self._running = not paused
+    self._cameraTask = taskMgr.add(self.task, self._taskName, uponDeath=self.cleanup)
 
   def stop(self):
     self.pause()
