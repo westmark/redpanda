@@ -211,6 +211,6 @@ def getIntersection(p1s, p1e, p2s, p2e):
 
 def is_point_in_rect(point, rect):
   px, py = point
-  rx, ry, rw, rh = rect
+  (rx, ry), (rw, rh) = rect
 
   return px >= rx and py > ry and px <= rx + rw and py <= ry + rh
