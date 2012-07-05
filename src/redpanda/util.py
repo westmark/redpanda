@@ -1,9 +1,10 @@
 # -*- coding: UTF-8 -*-
 
-from direct.showbase.DirectObject import DirectObject #@UnresolvedImport
-from panda3d.core import Point3, Vec3, Vec2D #@UnresolvedImport
-from pandac.PandaModules import VBase4 #@UnresolvedImport
+from direct.showbase.DirectObject import DirectObject
+from panda3d.core import Point3, Vec3, Vec2D
+from pandac.PandaModules import VBase4
 from math import cos, atan2, acos, sin, sqrt, pow
+import math
 
 
 class ScreenUtils(DirectObject):
@@ -214,3 +215,7 @@ def is_point_in_rect(point, rect):
   (rx, ry), (rw, rh) = rect
 
   return px >= rx and py > ry and px <= rx + rw and py <= ry + rh
+
+
+def get_closest_power_of_2(x):
+  return int(pow(2, math.ceil(math.log(x) / math.log(2))))
