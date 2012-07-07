@@ -2,6 +2,7 @@
 
 from redpanda.util import get_closest_power_of_2, is_point_in_rect
 from panda3d.core import NodePath, OrthographicLens
+import uuid
 
 
 class BufferRegion(object):
@@ -25,7 +26,7 @@ class BufferRegion(object):
   @property
   def texcoords(self):
     (x, y), (w, h) = self._region
-    return (x, y, w - 1, h - 1)
+    return (x, y, x + w - 1, y + h - 1)
 
   @property
   def render2d(self):
@@ -38,7 +39,7 @@ class BufferRegion(object):
 
 class Buffer(object):
 
-  def __init__(self, size, bg_color=(0, 0, 0, 1), name='Off screen buffer', film_size=(2, 2), near=-1000, far=1000):
+  def __init__(self, size, bg_color=(0, 0, 0, 1), overflow=False, name='Off screen buffer', film_size=(2, 2), near=-1000, far=1000):
     self._size = size
     self._bg_color = bg_color
     self._film_size = film_size
@@ -48,6 +49,7 @@ class Buffer(object):
     self._texture = None
     self._render2d = None
     self._used_regions = []
+    self._overflow = overflow
 
   def create(self):
     g_buffer = base.win.makeTextureBuffer(self._name, self._size, self._size)
@@ -86,22 +88,43 @@ class Buffer(object):
     if not self._used_regions:
       return ((x, y), (w, h))
 
+    sox, soy = self._overflow, self._overflow
+
+    if type(self._overflow) in (tuple, list):
+      sox, soy = self._overflow
+
     for br in self._used_regions:
       (rx, ry), (rw, rh) = br.region
-      x, y = rx + rw + 1, ry
 
-      if x + w < self._size and y + h < self._size:
-        if self._can_fit_specific_region(((x, y), (w, h))):
-          return ((x, y), (w, h))
+      if not sox:
+        x, y = rx + rw + 1, ry
+        if x + w < self._size and y + h < self._size:
+          if self._can_fit_specific_region(((x, y), (w, h))):
+            return ((x, y), (w, h))
 
-      x, y = rx, ry + rh + 1
-      if x + w < self._size and y + h < self._size:
-        if self._can_fit_specific_region(((x, y), (w, h))):
-          return ((x, y), (w, h))
+      if not soy:
+        x, y = rx, ry + rh + 1
+        if x + w < self._size and y + h < self._size:
+          if self._can_fit_specific_region(((x, y), (w, h))):
+            return ((x, y), (w, h))
 
     return None
 
-  def reserve(self, region_size):
+  def reserve(self, region_size, overflow, bg_color):
+
+    if tuple(bg_color) != tuple(self._bg_color):
+      return False
+
+    ox, oy, sox, soy = overflow, overflow, self._overflow, self._overflow
+    if type(overflow) in (tuple, list):
+      ox, oy = overflow
+
+    if type(self._overflow) in (tuple, list):
+      sox, soy = self._overflow
+
+    if ox and sox is False or oy and soy is False:
+      return False
+
     region = self._find_fit_for_region(region_size)
     if region is None:
       return False
@@ -132,26 +155,26 @@ class BufferManager(object):
   def __init__(self):
     self._buffers = {}
 
-  def create_buffer(self, size, bg_color=(0, 0, 0, 1), name='Off screen buffer', film_size=(2, 2), near=-1000, far=1000):
+  def create_buffer(self, size, bg_color=(0, 0, 0, 1), overflow=False):
     buffer_size = get_closest_power_of_2(max(size[0], size[1]))
-    buffer_region = self._find_available_buffer(buffer_size, size)
+    buffer_region = self._find_available_buffer(buffer_size, size, overflow, bg_color)
 
     if not buffer_region:
-      b = Buffer(buffer_size, bg_color=bg_color, name=name, film_size=film_size, near=near, far=far)
+      b = Buffer(buffer_size, bg_color=bg_color, overflow=overflow, name='buffer-' + str(uuid.uuid4()), film_size=(2, 2), near=-1000, far=1000)
       b.create()
       self._buffers.setdefault(buffer_size, []).append(b)
-      buffer_region = b.reserve(size)
+      buffer_region = b.reserve(size, overflow, bg_color)
 
     return buffer_region
 
-  def _find_available_buffer(self, buffer_size, region_size):
+  def _find_available_buffer(self, buffer_size, region_size, overflow, bg_color):
     for size in self._buffers.keys():
       if buffer_size > size:
         continue
 
       buffers = self._buffers[size]
       for b in buffers:
-        buffer_region = b.reserve(region_size)
+        buffer_region = b.reserve(region_size, overflow, bg_color)
         if buffer_region:
           return buffer_region
 
