@@ -50,7 +50,7 @@ class Camera(DirectObject):
     self._dir = Vec3(0, 0, 0)
     self._middle = (int(u.winXmaxHalf), int(u.winYmaxHalf))
     self._lastPos = self._middle
-    self._revealMouseAt = None
+    self._revealMouseAt = self._middle
     self._cameraMoved = False
     self._speedX = speedX
     self._speedY = speedY
@@ -87,7 +87,8 @@ class Camera(DirectObject):
       props.setCursorHidden(True)
       base.win.requestProperties(props)
       self._revealMouseAt = (md.getX(), md.getY())
-      base.win.movePointer(0, self._middle[0], self._middle[1])
+      #self._lastPos = self._middle
+      #base.win.movePointer(0, self._middle[0], self._middle[1])
     else:
       self._revealMouseAt = None
       self._lastPos = (md.getX(), md.getY())
@@ -115,16 +116,15 @@ class Camera(DirectObject):
 
   def task(self, task):
     md = base.win.getPointer(0)
-
     x, y = md.getX(), md.getY()
-    if self._hideCursor:
-      dx, dy = x - self._middle[0], y - self._middle[1]
-    else:
-      dx, dy = x - self._lastPos[0], y - self._lastPos[1]
 
     if self._running:
       if self._hideCursor:
-        base.win.movePointer(0, self._middle[0], self._middle[1])
+        dx, dy = x - self._revealMouseAt[0], y - self._revealMouseAt[1]
+      else:
+        dx, dy = x - self._lastPos[0], y - self._lastPos[1]
+      if self._hideCursor and (dx or dy):
+        base.win.movePointer(0, self._revealMouseAt[0], self._revealMouseAt[1])
       if dx == 0 and dy == 0:
         return task.cont
 
@@ -135,7 +135,10 @@ class Camera(DirectObject):
       if not (x, y) == self._lastPos:
         base.messenger.send('mousemove', [(x, y), self._lastPos])
 
-    self._lastPos = (x, y)
+    if self._running and self._hideCursor:
+      self._lastPos = self._revealMouseAt
+    else:
+      self._lastPos = (x, y)
 
     return task.cont
 
@@ -175,6 +178,10 @@ class Camera(DirectObject):
 
       base.camera.setPos(self._dir - (dirVector * 5))
       self._cameraMoved = True
+
+  @property
+  def running(self):
+    return self._running
 
 
 class FPSCamera(Camera):
