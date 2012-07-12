@@ -95,13 +95,14 @@ class Camera(DirectObject):
     self._running = True
 
   def pause(self):
-    self._running = False
-    props = WindowProperties()
-    props.setCursorHidden(False)
-    base.win.requestProperties(props)
-    if self._revealMouseAt:
-      base.win.movePointer(0, self._revealMouseAt[0], self._revealMouseAt[1])
-      self._revealMouseAt = None
+    if self._running:
+      self._running = False
+      props = WindowProperties()
+      props.setCursorHidden(False)
+      base.win.requestProperties(props)
+      if self._revealMouseAt:
+        base.win.movePointer(0, self._revealMouseAt[0], self._revealMouseAt[1])
+        self._revealMouseAt = None
 
   def destroy(self):
     taskMgr.remove(self._taskName)
@@ -143,6 +144,9 @@ class Camera(DirectObject):
     return task.cont
 
   def mouseDelta(self, dx, dy):
+    pass
+
+  def zoom(self, *args, **kwargs):
     pass
 
   def move(self, direction, distance=None):
