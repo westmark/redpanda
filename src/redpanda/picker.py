@@ -85,13 +85,14 @@ class MousePicker(object):
 
     if (self.mCollisionQue.getNumEntries() > 0):
       self.mCollisionQue.sortEntries()
-      entry = self.mCollisionQue.getEntry(0)
-      pickedObj = entry.getIntoNodePath()
 
-      pickedObj = pickedObj.findNetTag(tag)
-      if not pickedObj.isEmpty():
-        pos = entry.getSurfacePoint(base.render)
-        return pickedObj, pos
+      for entry in self.mCollisionQue.getEntries():
+        pickedObj = entry.getIntoNodePath()
+        pickedObj = pickedObj.findNetTag(tag)
+
+        if not pickedObj.isEmpty():
+          pos = entry.getSurfacePoint(base.render)
+          return pickedObj, pos
 
     return None, None
 
