@@ -219,3 +219,10 @@ def is_point_in_rect(point, rect):
 
 def get_closest_power_of_2(x):
   return int(pow(2, math.ceil(math.log(x) / math.log(2))))
+
+
+def clear_children(*nodepaths):
+  if nodepaths:
+    for nodepath in nodepaths:
+      for child in nodepath.get_children():
+        child.remove()
